@@ -57,7 +57,7 @@ class Mode {
         int feed_angle_from_check = 50;
         int feed_speed = 50;
 
-        unsigned int barrier_close_angle = 71;
+        unsigned int barrier_close_angle = 80;
         unsigned int barrier_open_angle = 15;
         unsigned int barrier_up_speed = 120;
         unsigned int barrier_down_speed = 40;
