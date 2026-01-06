@@ -255,7 +255,7 @@ bool Mode::resetPedestal() {
 bool Mode::reloadPelletwithBarrierDown() {
     // Logic to reload the pedestal with the barrier
     Serial.println(F("Reloading pedestal with barrier..."));
-    moveBarrierDown();
+    moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
     movePedestalToServe();
     delay(100);
     moveBarrierUp();
@@ -334,7 +334,7 @@ bool Mode::checkButtonPress() {
             }
         } else if (digitalRead(button_pin_1) == LOW) {
             Serial.println(F("Button 1 pressed."));
-            moveBarrierDown();
+            moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         } else if (analogRead(button_pin_5) ==0) {
             Serial.println(F("Button 5 pressed."));
             resetPedestal();
@@ -352,7 +352,7 @@ bool Mode::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > 10000 && reachingAttempt == true) {
-        moveBarrierDown();
+        moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         if (barrierDownTriggered) {
             setReachingAttempt(false);
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
@@ -524,7 +524,7 @@ bool Mode2::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > 10000 && reachingAttempt == true) {
-        moveBarrierDown();
+        moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         if (barrierDownTriggered) {
             setReachingAttempt(false);
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
@@ -563,7 +563,7 @@ bool Mode3::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > 5000 && reachingAttempt == true && barrierDownTriggered == false) {
-        moveBarrierDown();
+        moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         if (barrierDownTriggered) {
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
             barrierDownTimer = 0; // Reset the timer
@@ -608,7 +608,7 @@ bool Mode4::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > 10000 && reachingAttempt == true) {
-        moveBarrierDown();
+        moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         if (barrierDownTriggered) {
             setReachingAttempt(false);
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
@@ -662,6 +662,7 @@ bool Mode5::checkFrontSensor() {
             digitalWrite(camera_pin, LOW);
             barrierDownTimer = millis();
             setReachingAttempt(true);
+            movePedestalToHome();
             attempt_count++;
             Serial.println(F("Reaching attempt initiated."));
             if (attempt_count < 10) {
@@ -677,7 +678,7 @@ bool Mode5::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > barrierDownTimeDuration && reachingAttempt == true && barrierDownTriggered == false) {
-        moveBarrierDown();
+        moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
         movePedestalToServe();
         if (barrierDownTriggered) {
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
