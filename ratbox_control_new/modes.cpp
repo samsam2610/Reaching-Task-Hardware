@@ -150,11 +150,13 @@ void Mode::movePedestalToServe() {
     // Serial.println(F("Moving feeder to serve position..."));
     int pedestal_status = getPedestalStatus();
     if (!(pedestal_status == 0)) {
-        movePedestalToHome(); 
-        delay(50);
-        movePedestalToCheck();
+       movePedestalToHome(); 
     }
-
+    if (!(pedestal_status == 1)) {
+       movePedestalToCheck();
+       delay(100);
+    }
+    
     while (!checkPelletStatus()) {
         movePedestalToHome();
         delay(500);
@@ -666,6 +668,9 @@ bool Mode5::checkFrontSensor() {
             barrierDownTimer = millis();
             setReachingAttempt(true);
             movePedestalToHome();
+            delay(50);
+            movePedestalToCheck();
+            delay(50);
             attempt_count++;
             Serial.println(F("Reaching attempt initiated."));
             if (attempt_count < 10) {
