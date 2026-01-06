@@ -149,11 +149,9 @@ void Mode::movePedestalToServe() {
     // Move the feeder to the serve position
     // Serial.println(F("Moving feeder to serve position..."));
     int pedestal_status = getPedestalStatus();
-    if (!(pedestal_status == 0)) {
-       movePedestalToHome();
-       delay(50);
-    }
     if (!(pedestal_status == 1)) {
+        movePedestalToHome();
+       delay(50);
        movePedestalToCheck();
        delay(100);
     }
