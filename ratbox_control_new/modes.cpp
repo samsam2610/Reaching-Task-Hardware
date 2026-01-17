@@ -297,54 +297,116 @@ void Mode::reselectMode() {
 }
 
 bool Mode::debounceButton(int pin, int pinIndex) {
-    // Check if the button state is stable for the debounce delay
-    if ((millis() - lastDebounceTime[pinIndex]) > debounce_delay) {
-        isClicked[pinIndex] = false;
+    // 1. Get the current raw reading
+    // Handle Button 4 & 5 which you are reading as Analog
+    bool currentReading;
+    if (pinIndex == 4 || pinIndex == 5) { // Assuming index 4/5 are buttons 4/5
+        currentReading = (analogRead(pin) == 0); 
+    } else {
+        currentReading = (digitalRead(pin) == LOW); 
     }
-    bool currentButtonState = digitalRead(pin);
-    if (currentButtonState != defaultButtonState[pinIndex]) {
-        if (isClicked[pinIndex] == false) {
-            lastDebounceTime[pinIndex] = millis(); // Reset debounce timer
-            Serial.println(F("Button state changed."));
-            isClicked[pinIndex] = true;
-            return true;
-        } else {
-            return false;
+
+    // Convert defaultState to a boolean 'isPressed' logic
+    // If default is HIGH (pull-up), then 'pressed' is when currentReading is LOW
+    bool isPhysicallyPressed = (currentReading != defaultButtonState[pinIndex]);
+
+    // 2. If the raw reading changed from the last time we checked, reset the timer
+    if (currentReading != lastRawState[pinIndex]) {
+        lastDebounceTime[pinIndex] = millis();
+    }
+    lastRawState[pinIndex] = currentReading;
+
+    // 3. Check if the signal has been stable for long enough
+    if ((millis() - lastDebounceTime[pinIndex]) > debounce_delay) {
+        
+        // 4. If the stable state is different from our confirmed state
+        if (currentReading != confirmedState[pinIndex]) {
+            confirmedState[pinIndex] = currentReading;
+
+            // 5. Only return true if the NEW stable state is the "Pressed" state
+            if (confirmedState[pinIndex] != defaultButtonState[pinIndex]) {
+                return true; 
+            }
         }
     }
+
     return false;
 }
 
+// bool Mode::checkButtonPress() {
+//     if (isInitialized == false) {
+//         return false;
+//     } else {
+//         if (digitalRead(button_pin_3) == LOW) {
+//             Serial.println(F("Button 3 pressed."));
+//             reloadPelletwithBarrierDown();
+//         } else if (analogRead(button_pin_4) ==0) {
+//             Serial.println(F("Button 4 pressed."));
+//             movePedestalToServe();
+//         } else if (digitalRead(button_pin_2) == LOW) {
+//             Serial.println(F("Button 2 pressed."));
+//             moveBarrierUp();
+//             if (isStarted == false) {
+//                 isStarted = true;
+//                 lcd.setCursor(0, 1);
+//                 lcd.print(F("               "));
+//                 delay(50);
+//                 lcd.setCursor(0, 1);
+//                 lcd.print("Attempt #: ");
+//             }
+//         } else if (digitalRead(button_pin_1) == LOW) {
+//             Serial.println(F("Button 1 pressed."));
+//             moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
+//         } else if (analogRead(button_pin_5) ==0) {
+//             Serial.println(F("Button 5 pressed."));
+//             resetPedestal();
+//         }
+//         return true;
+//     }
+// }
+
 bool Mode::checkButtonPress() {
-    if (isInitialized == false) {
-        return false;
-    } else {
-        if (digitalRead(button_pin_3) == LOW) {
-            Serial.println(F("Button 3 pressed."));
-            reloadPelletwithBarrierDown();
-        } else if (analogRead(button_pin_4) ==0) {
-            Serial.println(F("Button 4 pressed."));
-            movePedestalToServe();
-        } else if (digitalRead(button_pin_2) == LOW) {
-            Serial.println(F("Button 2 pressed."));
-            moveBarrierUp();
-            if (isStarted == false) {
-                isStarted = true;
-                lcd.setCursor(0, 1);
-                lcd.print(F("               "));
-                delay(50);
-                lcd.setCursor(0, 1);
-                lcd.print("Attempt #: ");
-            }
-        } else if (digitalRead(button_pin_1) == LOW) {
-            Serial.println(F("Button 1 pressed."));
-            moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
-        } else if (analogRead(button_pin_5) ==0) {
-            Serial.println(F("Button 5 pressed."));
-            resetPedestal();
+    if (!isInitialized) return false;
+
+    // Button 3: Reload Pellet
+    if (debounceButton(button_pin_3, 3)) {
+        Serial.println(F("Button 3 confirmed."));
+        reloadPelletwithBarrierDown();
+    } 
+    
+    // Button 4: Move Pedestal (Analog)
+    else if (debounceButton(button_pin_4, 4)) {
+        Serial.println(F("Button 4 confirmed."));
+        movePedestalToServe();
+    } 
+    
+    // Button 2: Barrier Up / Start Logic
+    else if (debounceButton(button_pin_2, 2)) {
+        Serial.println(F("Button 2 confirmed."));
+        moveBarrierUp();
+        if (!isStarted) {
+            isStarted = true;
+            lcd.setCursor(0, 1);
+            lcd.print(F("               "));
+            delay(50);
+            lcd.setCursor(0, 1);
+            lcd.print(F("Attempt #: "));
         }
-        return true;
+    } 
+    
+    // Button 1: Barrier Down
+    else if (debounceButton(button_pin_1, 1)) {
+        Serial.println(F("Button 1 confirmed."));
+        moveBarrierDown();
+    } 
+    
+    // Button 5: Reset Pedestal (Analog)
+    else if (debounceButton(button_pin_5, 5)) {
+        Serial.println(F("Button 5 confirmed."));
+        resetPedestal();
     }
+
+    return true;
 }
 
 bool Mode::checkFrontSensor() {
