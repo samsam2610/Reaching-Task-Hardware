@@ -506,34 +506,70 @@ Mode2::Mode2(ServoEasing& barrier_servo, ServoEasing& pedestal_servo, LiquidCrys
     }
 
 bool Mode2::initialize() {
+    lcd.setCursor(0, 0);
+    lcd.print(F("               "));
+    delay(50);
+    lcd.setCursor(0, 0);
+    lcd.print(F("Mode 2"));
+    Serial.println(F("Analog read of each pin:"));
+    Serial.print(F("Button 1: "));
+    Serial.println(analogRead(button_pin_1));
+    Serial.print(F("Button 2: "));
+    Serial.println(analogRead(button_pin_2));
+    Serial.print(F("Button 3: "));
+    Serial.println(analogRead(button_pin_3));
+    Serial.print(F("Button 4: "));
+    Serial.println(digitalRead(button_pin_4));
+    Serial.print(F("Button 5: "));
+    Serial.println(analogRead(button_pin_5));
     setBarrierPosition(barrier_close_angle);
-    delay(100);
+    setInitialized(true);
     calibratePedestal();
     delay(100);
     movePedestalToHome();
-    setInitialized(true);
-    setMode(2);
-    lcd.setCursor(0, 0);
-    lcd.print(F("Mode 2"));
+    delay(100);
+    movePedestalToServe();
+    setMode(5);
+    pinMode(12, OUTPUT); //camera trigger, rising edge
     return true;
 }
 
 bool Mode2::checkFrontSensor() {
-    int front_sensor_reading = digitalRead(front_sensor_pin);
-    if (front_sensor_reading == LOW) { // Front sensor is triggered
+
+    if (digitalRead(front_sensor_pin) == LOW && barrierUpTriggered== true ) { // Front sensor is triggered
         if (reachingAttempt == false) {
+            digitalWrite(camera_pin, HIGH); // trigger the camera by generating a 100ms pulse
+            delay(200); //adjust the width of the Pulse here, for example 100 for a 100 ms pulse
+            digitalWrite(camera_pin, LOW);
             barrierDownTimer = millis();
             setReachingAttempt(true);
+            attempt_count++;
             Serial.println(F("Reaching attempt initiated."));
+            if (attempt_count < 10) {
+                lcd.setCursor(12, 1);
+                lcd.print(attempt_count);
+            } else if (attempt_count < 100) {
+                lcd.setCursor(11, 1);
+                lcd.print(attempt_count);
+            } else {
+                lcd.setCursor(10, 1);
+                lcd.print(attempt_count);
+            }
         }
     }
-    if ((millis() - barrierDownTimer) > 10000 && reachingAttempt == true) {
+    if ((millis() - barrierDownTimer) > barrierDownTimeDuration && reachingAttempt == true && barrierDownTriggered == false) {
         moveBarrierDown(); // Set barrierDownTriggered to true and barrierUpTriggered to false
+        movePedestalToServe();
         if (barrierDownTriggered) {
-            setReachingAttempt(false);
             barrierUpTimer = millis(); // Start the timer before the barrier goes up
             barrierDownTimer = 0; // Reset the timer
+            
         }
+    }
+    int pedestal_status = getPedestalStatus();
+    if ((millis() - barrierUpTimer) > barrierUpWaitTimeDuration && barrierDownTriggered == true && pedestal_status == 3 && reachingAttempt == true) {
+        setReachingAttempt(false);
+        moveBarrierUp();
     }
     return true;
 }
