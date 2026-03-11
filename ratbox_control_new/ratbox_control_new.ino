@@ -158,7 +158,7 @@ void setup() {
 
   // If no mode is selected, default to mode 1
   if (selectedMode == 0) {
-    selectedMode = 5;
+    selectedMode = 6;
     Serial.println(F("No mode selected.Defaulting to mode 5."));
   }
 
@@ -192,6 +192,12 @@ void setup() {
       {
         static Mode5 mode5(curtainServo, pedestalServo, lcd);
         currentMode = &mode5;
+        break;
+      }
+    case 6:
+      {
+        static Mode6 mode6(curtainServo, pedestalServo, lcd);
+        currentMode = &mode6;
         break;
       }
   }

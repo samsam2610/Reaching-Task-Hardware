@@ -47,7 +47,7 @@ class Mode {
         bool reachingAttempt = false;
         bool barrierUpTriggered = false;
         bool barrierDownTriggered = false;
-        unsigned long barrierDownTimeDuration = 2000;
+        unsigned long barrierDownTimeDuration = 500;
         unsigned long barrierUpTimeDuration = 500;
         unsigned long barrierUpWaitTimeDuration = 100; 
         unsigned long barrierDownTimer = 0;
@@ -57,12 +57,12 @@ class Mode {
         int check_angle = 10;
         int feed_angle = 80;
         int feed_angle_from_check = 50;
-        int feed_speed = 50;
+        int feed_speed = 40;
 
         unsigned int barrier_close_angle = 15;
         unsigned int barrier_open_angle = 75;
         unsigned int barrier_up_speed = 120;
-        unsigned int barrier_down_speed = 40;
+        unsigned int barrier_down_speed = 50;
 
         unsigned int attempt_count = 0;
 
@@ -87,6 +87,7 @@ class Mode {
         virtual void movePedestalToFeed(int angle, int speed);
         virtual void movePedestalToHome(int angle, int speed);
         virtual void movePedestalToServe();
+        virtual void movePedestalToServeWithBarrier();
         virtual bool loadPellet();
         virtual bool setMode(int selected_mode);
         virtual bool setButtonPins(int pin_1, int pin_2, int pin_3, int pin_4, int pin_5);
@@ -156,6 +157,14 @@ class Mode4 : public Mode {
 class Mode5 : public Mode {
     public:
         Mode5(ServoEasing& barrier_servo, ServoEasing& pedestal_servo, LiquidCrystal_I2C& lcd);
+        bool initialize() override;
+        bool checkFrontSensor() override;
+};
+
+// Mode 6: Like Mode 5, but barrier lowers only after pellet confirmed, then rises after feed
+class Mode6 : public Mode {
+    public:
+        Mode6(ServoEasing& barrier_servo, ServoEasing& pedestal_servo, LiquidCrystal_I2C& lcd);
         bool initialize() override;
         bool checkFrontSensor() override;
 };
