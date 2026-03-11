@@ -45,7 +45,7 @@ class Mode {
         bool reachingAttempt = false;
         bool barrierUpTriggered = false;
         bool barrierDownTriggered = false;
-        unsigned long barrierDownTimeDuration = 500;
+        unsigned long barrierDownTimeDuration = 2500;
         unsigned long barrierUpTimeDuration = 500;
         unsigned long barrierUpWaitTimeDuration = 100; 
         unsigned long barrierDownTimer = 0;

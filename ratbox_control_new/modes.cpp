@@ -186,8 +186,11 @@ void Mode::movePedestalToServeWithBarrier() {
 
     // Pellet confirmed — lower barrier, feed, raise barrier
     moveBarrierDown();
+    delay(50);
     movePedestalToFeed();
+    delay(50); 
     moveBarrierUp();
+    delay(50);
 }
 
 int Mode::getPedestalStatus() {
@@ -866,10 +869,6 @@ bool Mode6::checkFrontSensor() {
             digitalWrite(camera_pin, LOW);
             barrierDownTimer = millis();
             setReachingAttempt(true);
-            movePedestalToHome();
-            delay(50);
-            movePedestalToCheck();
-            delay(50);
             attempt_count++;
             Serial.println(F("Reaching attempt initiated."));
             if (attempt_count < 10) {
@@ -885,6 +884,8 @@ bool Mode6::checkFrontSensor() {
         }
     }
     if ((millis() - barrierDownTimer) > barrierDownTimeDuration && reachingAttempt == true && barrierDownTriggered == false) {
+        movePedestalToHome();
+        delay(50);
         // Confirm pellet -> barrier down -> pedestal to feed -> barrier up
         movePedestalToServeWithBarrier();
         setReachingAttempt(false);
