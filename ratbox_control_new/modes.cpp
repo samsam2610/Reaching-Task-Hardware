@@ -853,6 +853,8 @@ bool Mode6::initialize() {
     movePedestalToHome();
     delay(100);
     movePedestalToCheck();
+    delay(100);
+    movePedestalToFeed();
     setMode(6);
     pinMode(12, OUTPUT); //camera trigger, rising edge
     return true;
