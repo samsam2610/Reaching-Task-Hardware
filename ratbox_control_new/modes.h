@@ -32,6 +32,8 @@ class Mode {
         // Debounce variables
         unsigned long debounce_delay = 250;
         int lastDebounceTime[5] = {0, 0, 0, 0, 0}; // Stores the last time the button state changed
+        bool lastRawState[5] = {HIGH, HIGH, HIGH, LOW, LOW};
+        bool confirmedState[5] = {HIGH, HIGH, HIGH, LOW, LOW};
         bool defaultButtonState[5] = {HIGH, HIGH, HIGH, LOW, LOW}; // Default button state for active high buttons
         bool lastButtonState[5] = {HIGH, HIGH, HIGH, LOW, LOW}; // Stores the last button state
         bool isClicked[5] = {false, false, false, false, false}; // Stores the last button state
@@ -57,8 +59,8 @@ class Mode {
         int feed_angle_from_check = 50;
         int feed_speed = 40;
 
-        unsigned int barrier_close_angle = 75;
-        unsigned int barrier_open_angle = 15;
+        unsigned int barrier_close_angle = 15;
+        unsigned int barrier_open_angle = 75;
         unsigned int barrier_up_speed = 120;
         unsigned int barrier_down_speed = 50;
 
