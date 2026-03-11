@@ -111,8 +111,8 @@ void setup() {
   pedestalServo.attach(SERVO_PIN_PEDESTAL, 0);  // Attach the servo to pin D9
   delay(500);
   curtainServo.setEasingType(EASE_CUBIC_IN_OUT);
-  pedestalServo.setSpeed(5);
-  curtainServo.attach(SERVO_PIN_CURTAIN, 74);
+  pedestalServo.setSpeed(5);  
+  curtainServo.attach(SERVO_PIN_CURTAIN, 15);
 
   // Blink LED to indicate mode selection
   blinkLED(5, 200);
